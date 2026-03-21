@@ -1,13 +1,22 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 
+/**
+ * KONFIGURACJA FORMSPREE
+ * 1. Zaloguj się na formspree.io
+ * 2. Utwórz nowy formularz
+ * 3. Wklej poniżej swój ID (znajdziesz go w zakładce "Settings" na Formspree)
+ */
+const FORMSPREE_ID = 'mpqynnjo'; // Zmień to na swój ID z Formspree
+
 // Ikony SVG
 const IconPalette = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20.94c1.88 0 3.05-1.4 3.05-3.11 0-.84-.35-1.45-.8-1.97-.3-.33-.35-.42-.35-.87 0-1.1 1-1.94 2.05-1.94 2.1 0 3.05 1.5 3.05 3.11 0 4.66-3.14 7.78-7 7.78s-7-3.12-7-7.78c0-3.17 1.95-8.11 8-11.11 4.03-2 6.96 0 6.96 3 0 1.5-1.5 3-3 3s-3-1.5-3-3V2" /></svg>;
 const IconX = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>;
 const IconFile = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12 a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>;
 const IconArrowRight = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>;
 const IconChevronLeft = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>;
+const IconCheck = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"></polyline></svg>;
+const IconInstagram = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>;
 
-// Komponent Karty Projektu
 const ProjectCard = ({ project, onClick }) => (
   <div className="group cursor-pointer" onClick={onClick}>
     <div className="aspect-[3/4] overflow-hidden rounded-[24px] md:rounded-[40px] border border-white/5 bg-[#141414] relative shadow-xl transition-all duration-700">
@@ -27,13 +36,15 @@ const ProjectCard = ({ project, onClick }) => (
 );
 
 const App = () => {
-  const [view, setView] = useState('home'); 
+  const [view, setView] = useState('home');
   const [selectedProject, setSelectedProject] = useState(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAgreed, setIsAgreed] = useState(false);
   const [activeFilter, setActiveFilter] = useState('All');
-  
+  const [submitStatus, setSubmitStatus] = useState(null); 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const sectionRefs = {
     hero: useRef(null),
     about: useRef(null),
@@ -63,7 +74,6 @@ const App = () => {
     { id: 4, title: "Meta Ads Campaign", category: "Social Media", img: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&q=80&w=1200", fullDesc: "Optymalizacja kreacji reklamowych dla sektora e-commerce.", tools: ["Photoshop", "Meta Ads"], featured: false },
     { id: 5, title: "AI Product Video", category: "Video", img: "https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&q=80&w=1200", fullDesc: "Generowanie wideo produktowego za pomocą Kling 2.5 i Runway Gen-3.", tools: ["Kling 2.5", "Premiere Pro"], featured: false },
     { id: 6, title: "3D Furniture Rendering", category: "Visualizations", img: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=1200", fullDesc: "Fotorealistyczne wizualizacje 3D produktów meblowych.", tools: ["Blender", "V-Ray"], featured: false },
-    { id: 7, title: "Instagram Brand Grid", category: "Social Media", img: "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?auto=format&fit=crop&q=80&w=1200", fullDesc: "Spójny layout na social media oparty o wygenerowane assety AI.", tools: ["Midjourney", "Figma"], featured: false },
   ];
 
   const featuredProjects = allProjects.filter(p => p.featured);
@@ -90,13 +100,13 @@ const App = () => {
       year: "11.2024 - Obecnie", 
       role: "Grafik & AI Creator", 
       place: "Seart Group Sp. z o.o.", 
-      desc: "Optymalizacja kosztów sesji zdjęciowych poprzez wizualizacje 3D, następnie wdrożenie GenAI i zbudowanie procesów dla fotorealistycznch wizualizacji AI. Skrócenie czasu sesji zdjęciowych i postprodukcji o 70% oraz wygenerowanie oszczędności produkcji materiałów na poziomie 120%.Wizualizowanie mebli drewnianych oraz akcesoriów do domu z drewna i stali" 
+      desc: "Optymalizacja kosztów sesji zdjęciowych poprzez wizualizacje 3D, następnie wdrożenie GenAI i zbudowanie procesów dla fotorealistycznch wizualizacji AI." 
     },
     { 
       year: "09.2023 - 10.2024", 
       role: "Młodszy specjalista ds. e-commerce", 
       place: "Seart Group Sp. z o.o.", 
-      desc: "Prowadzenie i optymalizacja kampanii Meta Ads. Projektowanie grafik WWW oraz modelowanie 3D produktów na potrzeby sprzedaży online." 
+      desc: "Prowadzenie i optymalizacja kampanii Meta Ads. Projektowanie grafik WWW oraz modelowanie 3D produktów." 
     },
     { 
       year: "10.2019 - obecnie", 
@@ -106,19 +116,39 @@ const App = () => {
     }
   ];
 
-  const skills = [
-    { cat: "Narzędzia AI", items: "Midjourney, Kling 2.5, Flux.1, ComfyUI" },
-    { cat: "3D & Design", items: "Photoshop, SketchUp, V-Ray, Blender, Figma" },
-    { cat: "E-commerce", items: "Meta Ads, Magento, Optymalizacja sprzedaży" }
-  ];
-
-  const handleSubmit = (e) => {
+  // OBSŁUGA WYSYŁKI PRZEZ FORMSPREE
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isAgreed) return;
-    console.log("Formularz wysłany");
+    setIsSubmitting(true);
+
+    const form = e.target;
+    const data = new FormData(form);
+
+    try {
+      const response = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+        method: 'POST',
+        body: data,
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        setSubmitStatus('success');
+        form.reset();
+        setIsAgreed(false);
+      } else {
+        setSubmitStatus('error');
+      }
+    } catch (error) {
+      setSubmitStatus('error');
+    } finally {
+      setIsSubmitting(false);
+      setTimeout(() => setSubmitStatus(null), 5000);
+    }
   };
 
-  // Sub-komponenty widoków
   const HomeView = () => (
     <>
       {/* HERO */}
@@ -170,7 +200,7 @@ const App = () => {
                       <h4 className="text-[9px] uppercase tracking-[0.4em] font-black text-[#B5A995]">Podejście</h4>
                     </div>
                     <p className="text-gray-400 text-xs md:text-base font-light leading-relaxed">
-                      Jako <strong>AI Designer</strong>, specjalizuję się w fotorealistycznej produkcji wizualnej. Tworzę materiały, które pozwalają markom skalować ich obecność online bez kompromisów w jakości.
+                      Jako <strong>AI Designer</strong>, specjalizuję się w fotorealistycznej produkcji wizualnej. Tworzę materiały, które pozwalają markom skalować ich obecność online.
                     </p>
                   </div>
                   <div className="space-y-4">
@@ -190,17 +220,10 @@ const App = () => {
                     <div className="flex flex-col">
                       <span className="text-[8px] uppercase tracking-[0.5em] font-black text-[#B5A995] mb-2 opacity-60 italic">Praca</span>
                       <span className="text-sm md:text-lg uppercase font-light tracking-widest">Hybrydowo / Zdalnie</span>
-                    </div><div className="flex flex-col">
-                      <span className="text-[8px] uppercase tracking-[0.5em] font-black text-[#B5A995] mb-2 opacity-60 italic">Gdzie szukam?</span>
-                      <span className="text-sm md:text-lg uppercase font-light tracking-widest">Kielce / Kraków / Cała Polska</span>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[8px] uppercase tracking-[0.5em] font-black text-[#B5A995] mb-2 opacity-60 italic">Doświadczenie</span>
-                      <span className="text-sm md:text-lg uppercase font-light tracking-widest">6+ Lat Design</span>
-                    </div>
-                     <div className="flex flex-col">
-                      <span className="text-[8px] uppercase tracking-[0.5em] font-black text-[#B5A995] mb-2 opacity-60 italic">Języki</span>
-                      <span className="text-sm md:text-lg uppercase font-light tracking-widest">PL / EN (B2)</span>
+                      <span className="text-[8px] uppercase tracking-[0.5em] font-black text-[#B5A995] mb-2 opacity-60 italic">Lokalizacja</span>
+                      <span className="text-sm md:text-lg uppercase font-light tracking-widest">Kielce / Kraków / Remote</span>
                     </div>
                   </div>
                 </div>
@@ -220,19 +243,10 @@ const App = () => {
             <ProjectCard key={project.id} project={project} onClick={() => setSelectedProject(project)} />
           ))}
         </div>
-        
-        {/* Przycisk Przekierowujący - poprawione ułożenie strzałki */}
         <div className="mt-24 flex justify-center">
-          <button 
-            onClick={() => setView('portfolio')} 
-            className="group flex items-center gap-4 transition-all duration-300"
-          >
-            <span className="text-[11px] uppercase tracking-[0.4em] font-black text-white/40 group-hover:text-[#B5A995] transition-colors">
-              Zobacz pełne portfolio
-            </span>
-            <span className="text-white/40 group-hover:text-[#B5A995] group-hover:translate-x-2 transition-all duration-300">
-              <IconArrowRight />
-            </span>
+          <button onClick={() => setView('portfolio')} className="group flex items-center gap-4 transition-all duration-300">
+            <span className="text-[11px] uppercase tracking-[0.4em] font-black text-white/40 group-hover:text-[#B5A995] transition-colors">Zobacz pełne portfolio</span>
+            <span className="text-white/40 group-hover:text-[#B5A995] group-hover:translate-x-2 transition-all duration-300"><IconArrowRight /></span>
           </button>
         </div>
       </section>
@@ -241,9 +255,7 @@ const App = () => {
       <section ref={sectionRefs.experience} className="py-20 md:py-32 px-6 md:px-12 lg:px-24 bg-black">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 md:mb-20 gap-8">
-              <div>
-                <h2 className="text-4xl md:text-7xl font-black uppercase tracking-tighter">Doświadczenie <br /> <span className="text-[#B5A995] font-serif italic lowercase">rynkowe.</span></h2>
-              </div>
+              <h2 className="text-4xl md:text-7xl font-black uppercase tracking-tighter">Doświadczenie <br /> <span className="text-[#B5A995] font-serif italic lowercase">rynkowe.</span></h2>
               <button className="px-8 py-4 bg-white text-black rounded-full text-[10px] uppercase font-black tracking-widest flex items-center justify-center gap-3">Pobierz CV <IconFile /></button>
             </div>
             <div className="space-y-4 md:space-y-2 mb-20">
@@ -270,7 +282,6 @@ const App = () => {
           <IconChevronLeft /> Powrót
         </button>
         <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter mb-20">Pełne <span className="text-[#B5A995] font-serif italic lowercase">Portfolio.</span></h2>
-        
         <div className="flex flex-wrap gap-4 mb-16">
           {['All', 'AI Art', 'Design', 'Social Media', 'Video', 'Visualizations'].map(filter => (
             <button key={filter} onClick={() => setActiveFilter(filter)} className={`px-6 py-2 rounded-full text-[9px] uppercase tracking-widest font-black transition-all ${activeFilter === filter ? 'bg-[#B5A995] text-black' : 'border border-white/10 hover:border-white/40'}`}>
@@ -278,7 +289,6 @@ const App = () => {
             </button>
           ))}
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
           {filteredProjects.map(project => (
             <ProjectCard key={project.id} project={project} onClick={() => setSelectedProject(project)} />
@@ -308,52 +318,93 @@ const App = () => {
           <button onClick={() => scrollTo('experience')} className="hover:text-[#B5A995] transition-all">Kariera</button>
           <button onClick={() => scrollTo('contact')} className="bg-white text-black px-8 py-3.5 rounded-full hover:bg-[#B5A995] transition-all">Kontakt</button>
         </div>
-        <button className="md:hidden flex flex-col gap-2 p-2" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-          <span className={`w-7 h-[1.5px] bg-white transition-all ${isMobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
-          <span className={`w-7 h-[1.5px] bg-white transition-all ${isMobileMenuOpen ? 'opacity-0' : ''}`}></span>
-          <span className={`w-7 h-[1.5px] bg-white transition-all ${isMobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
-        </button>
       </nav>
-
-      {/* Menu Mobilne */}
-      <div className={`fixed inset-0 z-[90] bg-black transition-transform duration-500 flex flex-col justify-center items-center gap-10 text-center px-6 md:hidden ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-          <button onClick={() => scrollTo('about')} className="text-3xl font-black tracking-tighter uppercase">O mnie</button>
-          <button onClick={() => { setView('portfolio'); setIsMobileMenuOpen(false); }} className="text-3xl font-black tracking-tighter uppercase">Portfolio</button>
-          <button onClick={() => scrollTo('experience')} className="text-3xl font-black tracking-tighter uppercase">Doświadczenie</button>
-          <button onClick={() => scrollTo('contact')} className="px-12 py-5 bg-white text-black rounded-full font-black tracking-widest text-sm uppercase">Kontakt</button>
-      </div>
 
       <main className="relative z-10">
         {view === 'home' ? <HomeView /> : <PortfolioView />}
         
-        {/* SEKCOJA KONTAKT (Wspólna) */}
+        {/* SEKCOJA KONTAKT - ZMODYFIKOWANA POD FORMSPREE */}
         <section ref={sectionRefs.contact} className="py-20 md:py-32 px-6 md:px-12 lg:px-24 border-t border-white/5 bg-[#0D0D0D]">
-          <div className="max-w-7xl mx-auto">
-            <div className="grid lg:grid-cols-2 gap-24">
-              <div className="flex flex-col justify-between">
-                <div>
-                  <h2 className="text-5xl md:text-[7vw] font-black uppercase tracking-tighter leading-none mb-10">Zróbmy coś <br /> <span className="text-[#B5A995] font-serif italic lowercase font-normal">razem.</span></h2>
-                  <p className="text-gray-400 text-sm md:text-base font-light mb-12 max-w-sm">Chcesz omówić ofertę B2B lub stałą współpracę? Napisz bezpośrednio.</p>
-                </div>
-                <div className="space-y-6">
-                  <a href="mailto:sebastian.m.kaleta@gmail.com" className="text-xl md:text-2xl font-light hover:text-[#B5A995] transition-colors border-b border-white/10 pb-2 inline-block">sebastian.m.kaleta@gmail.com</a>
+          <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20">
+            <div className="flex flex-col justify-between">
+              <div>
+                <h2 className="text-5xl md:text-[7vw] font-black uppercase tracking-tighter leading-none mb-10">
+                  Zróbmy coś <br /> <span className="text-[#B5A995] font-serif italic lowercase font-normal">razem.</span>
+                </h2>
+                <p className="text-gray-400 text-sm md:text-base font-light mb-12 max-w-sm">Chcesz omówić ofertę B2B lub stałą współpracę? Napisz bezpośrednio.</p>
+              </div>
+              <div className="space-y-6">
+                <a href="mailto:sebastian.m.kaleta@gmail.com" className="text-xl md:text-2xl font-light hover:text-[#B5A995] transition-colors border-b border-white/10 pb-2 inline-block mb-8">
+                  sebastian.m.kaleta@gmail.com
+                </a>
+                <div className="flex gap-4">
+                  <a href="https://www.instagram.com/sebastian.aicreator" className="flex items-center gap-2 px-6 py-3 border border-white/10 rounded-full hover:bg-[#B5A995] hover:text-black transition-all group">
+                    <IconInstagram />
+                    <span className="text-[10px] uppercase font-black tracking-widest">@sebastian.aicreator</span>
+                  </a>
                 </div>
               </div>
-              <div className="bg-white/5 p-8 md:p-14 rounded-[30px] border border-white/5 backdrop-blur-md">
-                <form onSubmit={handleSubmit} className="space-y-8">
-                  <input required type="text" placeholder="IMIĘ / FIRMA" className="w-full bg-transparent border-b border-white/20 py-3 outline-none focus:border-[#B5A995] transition-colors uppercase text-[9px] tracking-widest" />
-                  <input required type="email" placeholder="E-MAIL" className="w-full bg-transparent border-b border-white/20 py-3 outline-none focus:border-[#B5A995] transition-colors uppercase text-[9px] tracking-widest" />
-                  <textarea required placeholder="PROJEKT / BRIEF" rows="3" className="w-full bg-transparent border-b border-white/20 py-3 outline-none focus:border-[#B5A995] transition-colors uppercase text-[9px] tracking-widest resize-none"></textarea>
-                  <div className="flex items-start gap-4 cursor-pointer" onClick={() => setIsAgreed(!isAgreed)}>
-                    <div className={`mt-1 min-w-[18px] h-[18px] border rounded flex items-center justify-center ${isAgreed ? 'bg-[#B5A995] border-[#B5A995]' : 'border-white/20'}`}>
-                      {isAgreed && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="4"><polyline points="20 6 9 17 4 12" /></svg>}
+            </div>
+
+            <div className="bg-white/5 p-8 md:p-12 rounded-[40px] border border-white/5 backdrop-blur-xl relative overflow-hidden">
+              {submitStatus === 'success' ? (
+                <div className="h-full flex flex-col items-center justify-center text-center py-20">
+                  <div className="w-20 h-20 bg-[#B5A995] rounded-full flex items-center justify-center mb-6 text-black"><IconCheck /></div>
+                  <h3 className="text-2xl font-black uppercase mb-2">Wysłano!</h3>
+                  <p className="text-gray-400">Odezwę się w ciągu 24 godzin na Twojego maila.</p>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-8 contact-form">
+                  <div className="space-y-2 group">
+                    <label className="text-[9px] uppercase tracking-[0.4em] font-black opacity-40 group-focus-within:opacity-100 group-focus-within:text-[#B5A995] transition-all">Imię / Firma</label>
+                    <input
+                      name="name"
+                      required
+                      type="text"
+                      placeholder="Podaj swoje dane..."
+                      className="w-full bg-transparent border-b border-white/10 py-4 outline-none focus:border-[#B5A995] transition-colors text-lg font-light custom-input"
+                    />
+                  </div>
+
+                  <div className="space-y-2 group">
+                    <label className="text-[9px] uppercase tracking-[0.4em] font-black opacity-40 group-focus-within:opacity-100 group-focus-within:text-[#B5A995] transition-all">E-mail</label>
+                    <input
+                      name="email"
+                      required
+                      type="email"
+                      placeholder="Twoja poczta..."
+                      className="w-full bg-transparent border-b border-white/10 py-4 outline-none focus:border-[#B5A995] transition-colors text-lg font-light custom-input"
+                    />
+                  </div>
+
+                  <div className="space-y-2 group">
+                    <label className="text-[9px] uppercase tracking-[0.4em] font-black opacity-40 group-focus-within:opacity-100 group-focus-within:text-[#B5A995] transition-all">Wiadomość</label>
+                    <textarea
+                      name="message"
+                      required
+                      rows="4"
+                      placeholder="W czym mogę pomóc?"
+                      className="w-full bg-transparent border-b border-white/10 py-4 outline-none focus:border-[#B5A995] transition-colors text-lg font-light resize-none custom-input"
+                    ></textarea>
+                  </div>
+
+                  <div className="flex items-center gap-4 cursor-pointer" onClick={() => setIsAgreed(!isAgreed)}>
+                    <div className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-all ${isAgreed ? 'bg-[#B5A995] border-[#B5A995]' : 'border-white/20'}`}>
+                      {isAgreed && <IconCheck />}
                     </div>
-                      <p className="text-[10px] text-white/40 leading-relaxed uppercase tracking-widest font-light select-none">
-                      Wyrażam zgodę na przetwarzanie danych osobowych w celu kontaktu i obsługi zapytania. <span className="text-[#B5A995] italic">Wymagane</span>
-                    </p>                  </div>
-                  <button disabled={!isAgreed} type="submit" className={`w-full py-5 rounded-full uppercase font-black tracking-widest text-[10px] transition-all ${isAgreed ? 'bg-white text-black hover:bg-[#B5A995]' : 'bg-white/10 text-white/20 cursor-not-allowed'}`}>Wyślij wiadomość</button>
+                    <p className="text-[10px] text-gray-500 leading-relaxed uppercase tracking-widest font-bold select-none">Akceptuję politykę prywatności</p>
+                  </div>
+
+                  <button
+                    disabled={!isAgreed || isSubmitting}
+                    type="submit"
+                    className={`w-full py-6 rounded-full text-[11px] uppercase tracking-[0.3em] font-black transition-all flex items-center justify-center gap-4 ${isAgreed && !isSubmitting ? 'bg-white text-black hover:bg-[#B5A995]' : 'bg-white/10 text-white/20 cursor-not-allowed'}`}
+                  >
+                    {isSubmitting ? 'Wysyłanie...' : 'Wyślij wiadomość'}
+                  </button>
+                  {submitStatus === 'error' && <p className="text-red-400 text-[10px] text-center uppercase tracking-widest">Błąd wysyłki. Spróbuj ponownie.</p>}
                 </form>
-              </div>
+              )}
             </div>
           </div>
         </section>
@@ -384,7 +435,7 @@ const App = () => {
       )}
 
       <footer className="py-24 px-6 bg-black border-t border-white/5 text-center">
-        <p className="text-[10px] text-[#B5A995] uppercase tracking-[0.8em] font-black italic">© 2026 Sebastian Kaleta</p>
+        <p className="text-[10px] text-[#B5A995] uppercase tracking-[0.8em] font-black italic">© 2024 Sebastian Kaleta • @sebastian.aicreator</p>
       </footer>
 
       <style dangerouslySetInnerHTML={{ __html: `
@@ -395,6 +446,18 @@ const App = () => {
         .font-serif { font-family: 'Playfair Display', serif; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #B5A995; border-radius: 10px; }
+
+        .custom-input:-webkit-autofill,
+        .custom-input:-webkit-autofill:hover, 
+        .custom-input:-webkit-autofill:focus, 
+        .custom-input:-webkit-autofill:active {
+          -webkit-box-shadow: 0 0 0 1000px #141414 inset !important;
+          -webkit-text-fill-color: #E5E1D8 !important;
+          transition: background-color 5000s ease-in-out 0s;
+          background-color: transparent !important;
+        }
+        .custom-input { background-color: transparent !important; color: #E5E1D8 !important; }
+        .custom-input:autofill { background-color: #141414 !important; color: #E5E1D8 !important; }
       `}} />
     </div>
   );
