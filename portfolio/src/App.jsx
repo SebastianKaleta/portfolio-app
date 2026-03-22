@@ -337,10 +337,19 @@ const App = () => {
                 <a href="mailto:sebastian.m.kaleta@gmail.com" className="text-xl md:text-2xl font-light hover:text-[#B5A995] transition-colors border-b border-white/10 pb-2 inline-block mb-8">
                   sebastian.m.kaleta@gmail.com
                 </a>
-                <div className="flex gap-4">
-                  <a href="https://www.instagram.com/sebastian.aicreator" className="flex items-center gap-2 px-6 py-3 border border-white/10 rounded-full hover:bg-[#B5A995] hover:text-black transition-all group">
+                {/* SOCJALE W KONTAKCIE */}
+                <div className="flex flex-wrap gap-4">
+                  <a href="https://www.instagram.com/sebastian.aicreator" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-6 py-3 border border-white/10 rounded-full hover:bg-[#B5A995] hover:text-black transition-all group">
                     <IconInstagram />
-                    <span className="text-[10px] uppercase font-black tracking-widest">@sebastian.aicreator</span>
+                    <span className="text-[10px] uppercase font-black tracking-widest">Instagram</span>
+                  </a>
+                  <a href="https://linkedin.com/in/sebastiankaleta" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-6 py-3 border border-white/10 rounded-full hover:bg-[#B5A995] hover:text-black transition-all group">
+                    <IconLinkedin />
+                    <span className="text-[10px] uppercase font-black tracking-widest">LinkedIn</span>
+                  </a>
+                  <a href="https://behance.net/sebastiankaleta" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-6 py-3 border border-white/10 rounded-full hover:bg-[#B5A995] hover:text-black transition-all group">
+                    <IconBehance />
+                    <span className="text-[10px] uppercase font-black tracking-widest">Behance</span>
                   </a>
                 </div>
               </div>
@@ -435,7 +444,7 @@ const App = () => {
       )}
 
       <footer className="py-24 px-6 bg-black border-t border-white/5 text-center">
-        <p className="text-[10px] text-[#B5A995] uppercase tracking-[0.8em] font-black italic">© 2024 Sebastian Kaleta • @sebastian.aicreator</p>
+        <p className="text-[10px] text-[#B5A995] uppercase tracking-[0.8em] font-black italic">© 2024 Sebastian Kaleta</p>
       </footer>
 
       <style dangerouslySetInnerHTML={{ __html: `
