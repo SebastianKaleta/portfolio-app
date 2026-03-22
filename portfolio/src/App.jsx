@@ -18,6 +18,7 @@ const IconCheck = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="no
 const IconInstagram = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>;
 const IconLinkedin = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>;
 const IconBehance = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12c2.1 0 3-1 3-2.5S11.1 7 9 7H5v5h4zM9 18c2.4 0 3.5-1.2 3.5-3s-1.1-3-3.5-3H5v6h4zM15 10h5v1h-5zM15 12c0 2.5 5 2.5 5 0"></path></svg>;
+const IconX = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>;
 
 
 const ProjectCard = ({ project, onClick }) => (
@@ -44,6 +45,8 @@ const App = () => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAgreed, setIsAgreed] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false); // Nowy stan dla polityki
+  const [isAgreed, setIsAgreed] = useState(false);
   const [activeFilter, setActiveFilter] = useState('All');
   const [submitStatus, setSubmitStatus] = useState(null); 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,6 +58,20 @@ const App = () => {
     experience: useRef(null),
     contact: useRef(null)
   };
+
+  // Zmiana ikony na zakładce (Favicon)
+  useEffect(() => {
+    const favicon = document.querySelector("link[rel*='icon']") || document.createElement('link');
+    favicon.type = 'image/svg+xml';
+    favicon.rel = 'shortcut icon';
+    // Ustawienie stylowej litery "S" jako ikony
+    favicon.href = `data:image/svg+xml,
+      <svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22>
+        <rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%230D0D0D%22/>
+        <text y=%22.9em%22 font-size=%2280%22 font-family=%22serif%22 fill=%22%23B5A995%22 font-style=%22italic%22 x=%2250%%22 text-anchor=%22middle%22>S</text>
+      </svg>`.replace(/\s+/g, ' ');
+    document.getElementsByTagName('head')[0].appendChild(favicon);
+  }, []);
 
   const handleMouseMove = (e) => {
     if (window.innerWidth > 768) {
@@ -70,6 +87,20 @@ const App = () => {
     if (view !== 'home') window.scrollTo(0, 0);
   }, [selectedProject, isMobileMenuOpen, view]);
 
+const PrivacyContent = () => (
+    <div className="space-y-6 text-gray-300 font-light text-sm md:text-base leading-relaxed">
+      <h4 className="text-[#B5A995] font-black uppercase tracking-widest text-xs">1. Administrator Danych</h4>
+      <p>Administratorem danych osobowych jest Sebastian Kaleta. Kontakt: sebastian.m.kaleta@gmail.com</p>
+      
+      <h4 className="text-[#B5A995] font-black uppercase tracking-widest text-xs">2. Cel Przetwarzania</h4>
+      <p>Dane wpisane w formularzu kontaktowym (imię, adres e-mail) przetwarzane są wyłącznie w celu udzielenia odpowiedzi na przesłaną wiadomość i nawiązania kontaktu biznesowego.</p>
+      
+      <h4 className="text-[#B5A995] font-black uppercase tracking-widest text-xs">3. Bezpieczeństwo</h4>
+      <p>Dane są przesyłane bezpiecznym połączeniem i nie są udostępniane podmiotom trzecim w celach marketingowych. Masz prawo do wglądu w swoje dane oraz żądania ich usunięcia w dowolnym momencie.</p>
+    </div>
+  );
+
+  
   const allProjects = [
     { id: 1, title: "Komercyjna Produkcja AI", category: "AI Art", img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=1200", fullDesc: "Zastosowanie zaawansowanych modeli generatywnych w kampaniach produktowych.", tools: ["Flux.1 Pro", "Photoshop"], featured: true },
     { id: 2, title: "System Identyfikacji Wizualnej", category: "Design", img: "https://images.unsplash.com/photo-1633167606207-d840b5070fc2?auto=format&fit=crop&q=80&w=1200", fullDesc: "Kreowanie spójnego języka wizualnego z wykorzystaniem AI.", tools: ["ComfyUI", "Magnific AI"], featured: true },
@@ -114,6 +145,12 @@ const App = () => {
     { 
       year: "10.2019 - obecnie", 
       role: "Graphic Designer", 
+      place: "Freelance", 
+      desc: "Dostarczanie kompleksowych rozwiązań graficznych pozwalających firmom skutecznie działać na rynku." 
+    },
+    { 
+      year: "03.2016 - 08.2023", 
+      role: "Graphic & CAD ", 
       place: "Freelance", 
       desc: "Dostarczanie kompleksowych rozwiązań graficznych pozwalających firmom skutecznie działać na rynku." 
     }
@@ -400,12 +437,17 @@ const App = () => {
                     ></textarea>
                   </div>
 
-                  <div className="flex items-center gap-4 cursor-pointer" onClick={() => setIsAgreed(!isAgreed)}>
-                    <div className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-all ${isAgreed ? 'bg-[#B5A995] border-[#B5A995]' : 'border-white/20'}`}>
-                      {isAgreed && <IconCheck />}
-                    </div>
-                    <p className="text-[10px] text-gray-500 leading-relaxed uppercase tracking-widest font-bold select-none">Akceptuję politykę prywatności</p>
-                  </div>
+                  <div className="flex items-center gap-4">
+        <div 
+          className={`w-6 h-6 rounded-lg border flex items-center justify-center cursor-pointer transition-all ${isAgreed ? 'bg-[#B5A995] border-[#B5A995]' : 'border-white/20'}`}
+          onClick={() => setIsAgreed(!isAgreed)}
+        >
+          {isAgreed && <IconCheck />}
+        </div>
+        <p className="text-[10px] text-gray-500 leading-relaxed uppercase tracking-widest font-bold select-none">
+          Akceptuję <button type="button" onClick={() => setShowPrivacy(true)} className="text-[#B5A995] hover:underline underline-offset-4">politykę prywatności</button>
+        </p>
+      </div>
 
                   <button
                     disabled={!isAgreed || isSubmitting}
@@ -421,6 +463,26 @@ const App = () => {
           </div>
         </section>
       </main>
+
+      {/* MODAL POLITYKI PRYWATNOŚCI */}
+      {showPrivacy && (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 md:p-8" onClick={() => setShowPrivacy(false)}>
+          <div className="absolute inset-0 bg-black/90 backdrop-blur-md"></div>
+          <div className="relative w-full max-w-2xl bg-[#111] border border-white/10 rounded-[30px] p-8 md:p-12 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <button className="absolute top-6 right-6 p-2 hover:text-[#B5A995] transition-colors" onClick={() => setShowPrivacy(false)}>
+              <IconX />
+            </button>
+            <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tighter mb-8">Polityka <span className="text-[#B5A995] font-serif italic lowercase">prywatności</span></h3>
+            <PrivacyContent />
+            <button 
+              onClick={() => setShowPrivacy(false)}
+              className="mt-10 w-full py-4 border border-[#B5A995] text-[#B5A995] rounded-full text-[10px] font-black tracking-widest hover:bg-[#B5A995] hover:text-black transition-all"
+            >
+              ROZUMIEM
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* MODAL PROJEKTU */}
       {selectedProject && (
